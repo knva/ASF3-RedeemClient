@@ -117,7 +117,23 @@ namespace RedeembyASF3
             return result;
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
 
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+
+                process.StartInfo.FileName = "ArchiSteamFarm.exe";   //asf
+                process.StartInfo.Arguments = "--server";
+
+                process.Start();
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+            }
+        }
     }
 
 
