@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,6 +19,7 @@ namespace RedeembyASF3
         public Form1()
         {
             InitializeComponent();
+            this.button1.Enabled = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -85,7 +87,7 @@ namespace RedeembyASF3
                 try
                 {
 
-                    MessageBox.Show(string.Format("{0} Key被获取,正在激活.", listStrKeys.Count));
+                    MessageBox.Show(string.Format("{0} Key被获取", listStrKeys.Count));
                     stra = (string.Format("redeem {0}", strKeys));
                 }
                 catch
@@ -119,20 +121,51 @@ namespace RedeembyASF3
 
         private void button2_Click(object sender, EventArgs e)
         {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.InitialDirectory = "./";//初始目录，不赋值也可以
+            openFileDialog1.Filter = "ArchiSteamFarm.exe(ArchiSteamFarm.exe) | ArchiSteamFarm.exe";//文件类型
+            openFileDialog1.ShowDialog();//弹出选择框
+            
             try
             {
-
+                String strOpenFileName = openFileDialog1.FileName;//打开的文件的全限定名
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
 
-                process.StartInfo.FileName = "ArchiSteamFarm.exe";   //asf
+                process.StartInfo.FileName = strOpenFileName;   //asf
                 process.StartInfo.Arguments = "--server";
 
                 process.Start();
+                if (process.Handle != null)
+                {
+                    this.button1.Enabled = true;
+                }
             }
-            catch (System.IO.FileNotFoundException)
+            catch (System.InvalidOperationException)
             {
-                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+                //MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
             }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            string str = Interaction.InputBox("输入服务器ip以及端口,例如 127.0.0.1:1242 ,若服务器没有使用--server 模式,则无法使用该连接进行激活操作.", "请输入服务器地址", "", 100, 100);
+            if (textBox1.Text.Length == 0)
+            {
+                MessageBox.Show(string.Format("没有获取到KEY!"));
+                return;
+            }
+            if (!ValidateIPAddress(str.Split(':')[0]))
+            {
+                MessageBox.Show(string.Format("服务器地址错误!"));
+                return;
+            }
+            string url = string.Format("{0}/IPC?command={1}", str, ExtractKeysAndReg(textBox1.Text));
+            Interaction.InputBox("输入服务器ip以及端口,例如 127.0.0.1:1242 ,若服务器没有使用--server 模式,则无法使用该连接进行激活操作.", "ipc连接", url, 100, 100);
+        }
+        public static bool ValidateIPAddress(string ipAddress)
+        {
+            Regex validipregex = new Regex(@"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
+            return (ipAddress != "" && validipregex.IsMatch(ipAddress.Trim())) ? true : false;
         }
     }
 
